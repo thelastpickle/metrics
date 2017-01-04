@@ -312,43 +312,73 @@ public class GraphiteReporter extends AbstractPollingReporter implements MetricP
     @Override
     public void processMeter(MetricName name, Metered meter, Long epoch) throws IOException {
         final String sanitizedName = sanitizeName(name);
-        sendInt(epoch, sanitizedName, "count", meter.count());
-        sendFloat(epoch, sanitizedName, "meanRate", meter.meanRate());
-        sendFloat(epoch, sanitizedName, "1MinuteRate", meter.oneMinuteRate());
-        sendFloat(epoch, sanitizedName, "5MinuteRate", meter.fiveMinuteRate());
-        sendFloat(epoch, sanitizedName, "15MinuteRate", meter.fifteenMinuteRate());
+        if (predicate.matches(name, meter, "count")) {
+            sendInt(epoch, sanitizedName, "count", meter.count());
+        }
+        if (predicate.matches(name, meter, "meanRate")) {
+            sendFloat(epoch, sanitizedName, "meanRate", meter.meanRate());
+        }
+        if (predicate.matches(name, meter, "1MinuteRate")) {
+            sendFloat(epoch, sanitizedName, "1MinuteRate", meter.oneMinuteRate());
+        }
+        if (predicate.matches(name, meter, "5MinuteRate")) {
+            sendFloat(epoch, sanitizedName, "5MinuteRate", meter.fiveMinuteRate());
+        }
+        if (predicate.matches(name, meter, "15MinuteRate")) {
+            sendFloat(epoch, sanitizedName, "15MinuteRate", meter.fifteenMinuteRate());
+        }
     }
 
     @Override
     public void processHistogram(MetricName name, Histogram histogram, Long epoch) throws IOException {
-        final String sanitizedName = sanitizeName(name);
-        sendSummarizable(epoch, sanitizedName, histogram);
-        sendSampling(epoch, sanitizedName, histogram);
+        sendSummarizable(epoch, name, histogram);
+        sendSampling(epoch, name, histogram);
     }
 
     @Override
     public void processTimer(MetricName name, Timer timer, Long epoch) throws IOException {
         processMeter(name, timer, epoch);
+        sendSummarizable(epoch, name, timer);
+        sendSampling(epoch, name, timer);
+    }
+
+    protected void sendSummarizable(long epoch, MetricName name, Summarizable metric) throws IOException {
         final String sanitizedName = sanitizeName(name);
-        sendSummarizable(epoch, sanitizedName, timer);
-        sendSampling(epoch, sanitizedName, timer);
+        if (predicate.matches(name, (Metric) metric, "min")) {
+            sendFloat(epoch, sanitizedName, "min", metric.min());
+        }
+        if (predicate.matches(name, (Metric) metric, "max")) {
+            sendFloat(epoch, sanitizedName, "max", metric.max());
+        }
+        if (predicate.matches(name, (Metric) metric, "mean")) {
+            sendFloat(epoch, sanitizedName, "mean", metric.mean());
+        }
+        if (predicate.matches(name, (Metric) metric, "stddev")) {
+            sendFloat(epoch, sanitizedName, "stddev", metric.stdDev());
+        }
     }
 
-    protected void sendSummarizable(long epoch, String sanitizedName, Summarizable metric) throws IOException {
-        sendFloat(epoch, sanitizedName, "min", metric.min());
-        sendFloat(epoch, sanitizedName, "max", metric.max());
-        sendFloat(epoch, sanitizedName, "mean", metric.mean());
-        sendFloat(epoch, sanitizedName, "stddev", metric.stdDev());
-    }
-
-    protected void sendSampling(long epoch, String sanitizedName, Sampling metric) throws IOException {
+    protected void sendSampling(long epoch, MetricName name, Sampling metric) throws IOException {
+        final String sanitizedName = sanitizeName(name);
         final Snapshot snapshot = metric.getSnapshot();
-        sendFloat(epoch, sanitizedName, "median", snapshot.getMedian());
-        sendFloat(epoch, sanitizedName, "75percentile", snapshot.get75thPercentile());
-        sendFloat(epoch, sanitizedName, "95percentile", snapshot.get95thPercentile());
-        sendFloat(epoch, sanitizedName, "98percentile", snapshot.get98thPercentile());
-        sendFloat(epoch, sanitizedName, "99percentile", snapshot.get99thPercentile());
-        sendFloat(epoch, sanitizedName, "999percentile", snapshot.get999thPercentile());
+        if (predicate.matches(name, (Metric) metric, "median")) {
+            sendFloat(epoch, sanitizedName, "median", snapshot.getMedian());
+        }
+        if (predicate.matches(name, (Metric) metric, "75percentile")) {
+            sendFloat(epoch, sanitizedName, "75percentile", snapshot.get75thPercentile());
+        }
+        if (predicate.matches(name, (Metric) metric, "95percentile")) {
+            sendFloat(epoch, sanitizedName, "95percentile", snapshot.get95thPercentile());
+        }
+        if (predicate.matches(name, (Metric) metric, "98percentile")) {
+            sendFloat(epoch, sanitizedName, "98percentile", snapshot.get98thPercentile());
+        }
+        if (predicate.matches(name, (Metric) metric, "99percentile")) {
+            sendFloat(epoch, sanitizedName, "99percentile", snapshot.get99thPercentile());
+        }
+        if (predicate.matches(name, (Metric) metric, "999percentile")) {
+            sendFloat(epoch, sanitizedName, "999percentile", snapshot.get999thPercentile());
+        }
     }
 
     protected void printVmMetrics(long epoch) {
