@@ -212,7 +212,7 @@ public class GraphiteReporter extends AbstractPollingReporter implements MetricP
             }
             printRegularMetrics(epoch);
             writer.flush();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Error writing to Graphite", e);
             } else {
