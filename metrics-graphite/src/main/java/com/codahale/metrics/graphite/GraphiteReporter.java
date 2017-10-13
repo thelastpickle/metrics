@@ -217,47 +217,47 @@ public class GraphiteReporter extends ScheduledReporter {
         final Snapshot snapshot = timer.getSnapshot();
 
         if (filter.matches(name, timer, "max")) {
-            graphite.send(prefix(name, "max"), format(convertDuration(snapshot.getMax())), timestamp);
+            send(prefix(name, "max"), convertDuration(snapshot.getMax()), timestamp);
         }
         if (filter.matches(name, timer, "mean")) {
-            graphite.send(prefix(name, "mean"), format(convertDuration(snapshot.getMean())), timestamp);
+            send(prefix(name, "mean"), convertDuration(snapshot.getMean()), timestamp);
         }
         if (filter.matches(name, timer, "min")) {
-            graphite.send(prefix(name, "min"), format(convertDuration(snapshot.getMin())), timestamp);
+            send(prefix(name, "min"), convertDuration(snapshot.getMin()), timestamp);
         }
         if (filter.matches(name, timer, "stddev")) {
-            graphite.send(prefix(name, "stddev"),
-                    format(convertDuration(snapshot.getStdDev())),
+            send(prefix(name, "stddev"),
+                convertDuration(snapshot.getStdDev()),
                     timestamp);
         }
         if (filter.matches(name, timer, "p50")) {
-            graphite.send(prefix(name, "p50"),
-                    format(convertDuration(snapshot.getMedian())),
+            send(prefix(name, "p50"),
+                convertDuration(snapshot.getMedian()),
                     timestamp);
         }
         if (filter.matches(name, timer, "p75")) {
-            graphite.send(prefix(name, "p75"),
-                    format(convertDuration(snapshot.get75thPercentile())),
+            send(prefix(name, "p75"),
+                convertDuration(snapshot.get75thPercentile()),
                     timestamp);
         }
         if (filter.matches(name, timer, "p95")) {
-            graphite.send(prefix(name, "p95"),
-                    format(convertDuration(snapshot.get95thPercentile())),
+            send(prefix(name, "p95"),
+                convertDuration(snapshot.get95thPercentile()),
                     timestamp);
         }
         if (filter.matches(name, timer, "p98")) {
-            graphite.send(prefix(name, "p98"),
-                    format(convertDuration(snapshot.get98thPercentile())),
+            send(prefix(name, "p98"),
+                convertDuration(snapshot.get98thPercentile()),
                     timestamp);
         }
         if (filter.matches(name, timer, "p99")) {
-            graphite.send(prefix(name, "p99"),
-                    format(convertDuration(snapshot.get99thPercentile())),
+            send(prefix(name, "p99"),
+                convertDuration(snapshot.get99thPercentile()),
                     timestamp);
         }
         if (filter.matches(name, timer, "p999")) {
-            graphite.send(prefix(name, "p999"),
-                    format(convertDuration(snapshot.get999thPercentile())),
+            send(prefix(name, "p999"),
+                convertDuration(snapshot.get999thPercentile()),
                     timestamp);
         }
 
@@ -269,23 +269,23 @@ public class GraphiteReporter extends ScheduledReporter {
             graphite.send(prefix(name, "count"), format(meter.getCount()), timestamp);
         }
         if (filter.matches(name, meter, "m1_rate")) {
-            graphite.send(prefix(name, "m1_rate"),
-                    format(convertRate(meter.getOneMinuteRate())),
+            send(prefix(name, "m1_rate"),
+                convertRate(meter.getOneMinuteRate()),
                     timestamp);
         }
         if (filter.matches(name, meter, "m5_rate")) {
-            graphite.send(prefix(name, "m5_rate"),
-                    format(convertRate(meter.getFiveMinuteRate())),
+            send(prefix(name, "m5_rate"),
+                convertRate(meter.getFiveMinuteRate()),
                     timestamp);
         }
         if (filter.matches(name, meter, "m15_rate")) {
-            graphite.send(prefix(name, "m15_rate"),
-                    format(convertRate(meter.getFifteenMinuteRate())),
+            send(prefix(name, "m15_rate"),
+                convertRate(meter.getFifteenMinuteRate()),
                     timestamp);
         }
         if (filter.matches(name, meter, "mean_rate")) {
-            graphite.send(prefix(name, "mean_rate"),
-                    format(convertRate(meter.getMeanRate())),
+            send(prefix(name, "mean_rate"),
+                convertRate(meter.getMeanRate()),
                     timestamp);
         }
     }
@@ -299,31 +299,31 @@ public class GraphiteReporter extends ScheduledReporter {
             graphite.send(prefix(name, "max"), format(snapshot.getMax()), timestamp);
         }
         if (filter.matches(name, histogram, "mean")) {
-            graphite.send(prefix(name, "mean"), format(snapshot.getMean()), timestamp);
+            send(prefix(name, "mean"), snapshot.getMean(), timestamp);
         }
         if (filter.matches(name, histogram, "min")) {
             graphite.send(prefix(name, "min"), format(snapshot.getMin()), timestamp);
         }
         if (filter.matches(name, histogram, "stddev")) {
-            graphite.send(prefix(name, "stddev"), format(snapshot.getStdDev()), timestamp);
+            send(prefix(name, "stddev"), snapshot.getStdDev(), timestamp);
         }
         if (filter.matches(name, histogram, "p50")) {
-            graphite.send(prefix(name, "p50"), format(snapshot.getMedian()), timestamp);
+            send(prefix(name, "p50"), snapshot.getMedian(), timestamp);
         }
         if (filter.matches(name, histogram, "p75")) {
-            graphite.send(prefix(name, "p75"), format(snapshot.get75thPercentile()), timestamp);
+            send(prefix(name, "p75"), snapshot.get75thPercentile(), timestamp);
         }
         if (filter.matches(name, histogram, "p95")) {
-            graphite.send(prefix(name, "p95"), format(snapshot.get95thPercentile()), timestamp);
+            send(prefix(name, "p95"), snapshot.get95thPercentile(), timestamp);
         }
         if (filter.matches(name, histogram, "p98")) {
-            graphite.send(prefix(name, "p98"), format(snapshot.get98thPercentile()), timestamp);
+            send(prefix(name, "p98"), snapshot.get98thPercentile(), timestamp);
         }
         if (filter.matches(name, histogram, "p99")) {
-            graphite.send(prefix(name, "p99"), format(snapshot.get99thPercentile()), timestamp);
+            send(prefix(name, "p99"), snapshot.get99thPercentile(), timestamp);
         }
         if (filter.matches(name, histogram, "p999")) {
-            graphite.send(prefix(name, "p999"), format(snapshot.get999thPercentile()), timestamp);
+            send(prefix(name, "p999"), snapshot.get999thPercentile(), timestamp);
         }
     }
 
@@ -338,11 +338,22 @@ public class GraphiteReporter extends ScheduledReporter {
         }
     }
 
+    private void send(String metric, double value, long time) throws IOException {
+        if (Double.isNaN(value)) {
+            return;
+        }
+        graphite.send(metric, format(value), time);
+    }
+
     private String format(Object o) {
         if (o instanceof Float) {
             return format(((Float) o).doubleValue());
         } else if (o instanceof Double) {
-            return format(((Double) o).doubleValue());
+            final double doubleValue = ((Double) o).doubleValue();
+            if (Double.isNaN(doubleValue)) {
+                return null;
+            }
+            return format(doubleValue);
         } else if (o instanceof Byte) {
             return format(((Byte) o).longValue());
         } else if (o instanceof Short) {

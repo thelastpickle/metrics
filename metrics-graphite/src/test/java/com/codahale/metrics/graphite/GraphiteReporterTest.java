@@ -184,7 +184,7 @@ public class GraphiteReporterTest {
         when(snapshot.get95thPercentile()).thenReturn(8.0);
         when(snapshot.get98thPercentile()).thenReturn(9.0);
         when(snapshot.get99thPercentile()).thenReturn(10.0);
-        when(snapshot.get999thPercentile()).thenReturn(11.0);
+        when(snapshot.get999thPercentile()).thenReturn(Double.NaN);
 
         when(histogram.getSnapshot()).thenReturn(snapshot);
 
@@ -207,7 +207,7 @@ public class GraphiteReporterTest {
         inOrder.verify(graphite).send("prefix.histogram.p95", "8.00", timestamp);
         inOrder.verify(graphite).send("prefix.histogram.p98", "9.00", timestamp);
         inOrder.verify(graphite).send("prefix.histogram.p99", "10.00", timestamp);
-        inOrder.verify(graphite).send("prefix.histogram.p999", "11.00", timestamp);
+        inOrder.verify(graphite, never()).send("prefix.histogram.p999", "NaN", timestamp);
         inOrder.verify(graphite).flush();
 
         verifyNoMoreInteractions(graphite);
